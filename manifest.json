@@ -1,0 +1,72 @@
+{
+  "id": "org.stanpx.rtaddon",
+  "version": "1.0.1",
+  "name": "RT Addon",
+  "description": "Contenido de RT (Russia Today) en varios idiomas: VOD y en vivo.",
+  "logo": "https://www.ecured.cu/images/9/9d/RT-TV.png",
+  "resources": [
+    "catalog",
+    "meta",
+    "stream"
+  ],
+  "types": [
+    "movie",
+    "series",
+    "tv"
+  ],
+  "catalogs": [
+    {
+      "type": "tv",
+      "id": "rt-live",
+      "name": "RT En Vivo"
+    },
+    {
+      "type": "movie",
+      "id": "rt-es-vod",
+      "name": "RT Español – VOD",
+      "extra": [
+        {
+          "name": "search",
+          "isRequired": false
+        }
+      ]
+    },
+    {
+      "type": "movie",
+      "id": "rt-en-vod",
+      "name": "RT English – VOD",
+      "extra": [
+        {
+          "name": "search",
+          "isRequired": false
+        }
+      ]
+    },
+    {
+      "type": "movie",
+      "id": "rt-ar-vod",
+      "name": "RT Arabic – VOD",
+      "extra": [
+        {
+          "name": "search",
+          "isRequired": false
+        }
+      ]
+    },
+    {
+      "type": "movie",
+      "id": "rt-news",
+      "name": "RT Noticias (RSS)",
+      "extra": [
+        {
+          "name": "search",
+          "isRequired": false
+        }
+      ]
+    }
+  ],
+  "idPrefixes": [
+    "rt:"
+  ],
+  "contactEmail": "stanpx@github.com"
+}

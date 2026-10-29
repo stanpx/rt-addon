@@ -274,6 +274,63 @@ async function fetchOdyseeVideos(channelClaim) {
 }
 
 /**
+ * Búsqueda de videos en Odysee para canales de RT
+ */
+async function searchOdyseeVideos(qText, channelClaim = "@ActualidadRT:9", max = 25) {
+  const cacheKey = `odysee_search:${channelClaim}:${qText}`;
+  const cached = getCached(cacheKey);
+  if (cached) return cached;
+
+  try {
+    const res = await httpClient.post(
+      "https://api.na-backend.odysee.com/api/v1/proxy",
+      {
+        jsonrpc: "2.0",
+        method: "claim_search",
+        params: {
+          text: qText,
+          channel: channelClaim,
+          claim_type: "stream",
+          order_by: ["release_time"],
+          page: 1,
+          page_size: max
+        },
+        id: 1
+      },
+      { headers: { "Content-Type": "application/json" } }
+    );
+
+    const items = (res.data?.result?.items || []).map((item) => {
+      const val = item.value || {};
+      const claimId = item.claim_id;
+      const name = item.name;
+      const title = val.title || name;
+      const thumb = val.thumbnail?.url || DEFAULT_LOGO;
+      const desc = val.description || title;
+      const streamUrl = `https://odysee.com/$/download/${name}/${claimId}`;
+
+      return {
+        id: `rt:vod:odysee:${claimId}`,
+        name: title,
+        poster: thumb,
+        url: streamUrl,
+        description: desc,
+        source: "Odysee Search",
+        claimId,
+        claimName: name
+      };
+    });
+
+    setCached(cacheKey, items);
+    return items;
+  } catch (err) {
+    console.error(`Error en búsqueda Odysee (${qText}):`, err.message);
+    return [];
+  }
+}
+
+
+/**
  * Scraping de sitios CMS oficiales de RT (noticias-rt.com, de-rt.com, lat.rt.rs, rtarabic.com, russiatoday.ru, rtbrasil.com)
  */
 async function scrapeRTWeb(url, sourceName = "RT Web") {
@@ -690,6 +747,23 @@ builder.defineCatalogHandler(async ({ type, id, extra }) => {
 
   // C) VOD Español
   if (id === "rt-es-vod") {
+    if (searchQuery) {
+      const searchItems = await searchOdyseeVideos(searchQuery, "@ActualidadRT:9", 30);
+      if (searchItems.length > 0) {
+        return {
+          metas: searchItems.map((v) => ({
+            id: v.id,
+            type: "movie",
+            name: v.name,
+            poster: v.poster,
+            posterShape: "regular",
+            description: v.description,
+            genres: ["RT Español", "VOD", "Búsqueda"]
+          }))
+        };
+      }
+    }
+
     const [odyseeES, webES, okruES, programasES] = await Promise.all([
       fetchOdyseeVideos("@ActualidadRT:9"),
       scrapeRTWeb("https://noticias-rt.com/video", "RT Español"),
@@ -719,6 +793,23 @@ builder.defineCatalogHandler(async ({ type, id, extra }) => {
 
   // D) VOD English
   if (id === "rt-en-vod") {
+    if (searchQuery) {
+      const searchItems = await searchOdyseeVideos(searchQuery, "@RT:fd", 30);
+      if (searchItems.length > 0) {
+        return {
+          metas: searchItems.map((v) => ({
+            id: v.id,
+            type: "movie",
+            name: v.name,
+            poster: v.poster,
+            posterShape: "regular",
+            description: v.description,
+            genres: ["RT English", "VOD", "Búsqueda"]
+          }))
+        };
+      }
+    }
+
     const [odyseeEN, rumbleEN] = await Promise.all([
       fetchOdyseeVideos("@RT:fd"),
       scrapeRumble("https://rumble.com/c/RTNews")
@@ -746,6 +837,23 @@ builder.defineCatalogHandler(async ({ type, id, extra }) => {
 
   // E) VOD Arabic
   if (id === "rt-ar-vod") {
+    if (searchQuery) {
+      const searchItems = await searchOdyseeVideos(searchQuery, "@RTArabic:0", 30);
+      if (searchItems.length > 0) {
+        return {
+          metas: searchItems.map((v) => ({
+            id: v.id,
+            type: "movie",
+            name: v.name,
+            poster: v.poster,
+            posterShape: "regular",
+            description: v.description,
+            genres: ["RT Arabic", "VOD", "Búsqueda"]
+          }))
+        };
+      }
+    }
+
     const [odyseeAR, webAR] = await Promise.all([
       fetchOdyseeVideos("@RTArabic:0"),
       scrapeRTWeb("https://rtarabic.com/videoclub/", "RT Arabic")

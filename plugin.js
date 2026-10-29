@@ -320,16 +320,122 @@ export async function home() {
   return rows;
 }
 
+// Búsqueda en VOD de RT vía API pública de Odysee (claim_search)
+async function searchOdyseeVideos(qText, max = 25) {
+  try {
+    const postData = JSON.stringify({
+      jsonrpc: "2.0",
+      method: "claim_search",
+      params: {
+        text: qText,
+        channel: "@ActualidadRT:9",
+        claim_type: "stream",
+        order_by: ["release_time"],
+        page: 1,
+        page_size: max
+      },
+      id: 1
+    });
+
+    const res = await kino.fetch("https://api.na-backend.odysee.com/api/v1/proxy", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: postData
+    });
+
+    const results = [];
+    if (res.ok) {
+      const json = await res.json();
+      const items = json?.result?.items || [];
+      items.forEach(item => {
+        const val = item.value || {};
+        const title = val.title || item.name;
+        const thumb = val.thumbnail?.url || DEFAULT_POSTER;
+        const downloadUrl = `https://odysee.com/$/download/${item.name}/${item.claim_id}`;
+
+        results.push({
+          id: cleanId("odysee", item.claim_id),
+          ref: `odysee:${item.claim_id}:${downloadUrl}`,
+          title: title,
+          kind: "movie",
+          poster: thumb,
+          overview: val.description || title
+        });
+      });
+    }
+
+    // Búsqueda complementaria en RT English
+    if (results.length < 5) {
+      const enPostData = JSON.stringify({
+        jsonrpc: "2.0",
+        method: "claim_search",
+        params: {
+          text: qText,
+          channel: "@RT:fd",
+          claim_type: "stream",
+          order_by: ["release_time"],
+          page: 1,
+          page_size: max
+        },
+        id: 1
+      });
+      const enRes = await kino.fetch("https://api.na-backend.odysee.com/api/v1/proxy", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: enPostData
+      });
+      if (enRes.ok) {
+        const enJson = await enRes.json();
+        const enItems = enJson?.result?.items || [];
+        enItems.forEach(item => {
+          const val = item.value || {};
+          const title = val.title || item.name;
+          const thumb = val.thumbnail?.url || DEFAULT_POSTER;
+          const downloadUrl = `https://odysee.com/$/download/${item.name}/${item.claim_id}`;
+
+          results.push({
+            id: cleanId("odysee", item.claim_id),
+            ref: `odysee:${item.claim_id}:${downloadUrl}`,
+            title: title,
+            kind: "movie",
+            poster: thumb,
+            overview: val.description || title
+          });
+        });
+      }
+    }
+
+    return results;
+  } catch (err) {
+    kino.log("Aviso en búsqueda Odysee:", String(err));
+    return [];
+  }
+}
+
 // Búsqueda en Kino TV
 export async function search(query) {
   await null;
-  const q = String(query || "").trim().toLowerCase();
-  const items = [];
+  const qText = typeof query === "string"
+    ? query.trim()
+    : (query && typeof query.q === "string"
+        ? query.q.trim()
+        : (query && typeof query.query === "string" ? query.query.trim() : ""));
 
-  // Buscar en canales en vivo
+  if (!qText) return [];
+  const q = qText.toLowerCase();
+  const items = [];
+  const seenIds = new Set();
+
+  function addItem(item) {
+    if (!item || seenIds.has(item.id)) return;
+    seenIds.add(item.id);
+    items.push(item);
+  }
+
+  // 1. Canales en vivo
   LIVE_SIGNALS.forEach(c => {
     if (c.title.toLowerCase().includes(q) || c.lang.toLowerCase().includes(q)) {
-      items.push({
+      addItem({
         id: c.id,
         ref: c.ref,
         title: `${c.title} (En Vivo)`,
@@ -339,12 +445,18 @@ export async function search(query) {
     }
   });
 
-  // Buscar en noticias RSS
+  // 2. Búsqueda en VOD de RT (Odysee / LBRY)
+  try {
+    const vodResults = await searchOdyseeVideos(qText, 25);
+    vodResults.forEach(addItem);
+  } catch (_) {}
+
+  // 3. Buscar en noticias RSS
   try {
     const news = await fetchNewsRSS("https://actualidad.rt.com/feeds/all.rss");
     news.forEach(n => {
       if (n.title.toLowerCase().includes(q)) {
-        items.push(n);
+        addItem(n);
       }
     });
   } catch (_) {}

@@ -10,6 +10,7 @@ build/
 .gradle/
 *.class
 *.jar
+!**/gradle-wrapper.jar
 *.cs3
 
 # Logs & temp

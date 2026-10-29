@@ -1,6 +1,9 @@
 package com.stanpx.rtaddon
 
+import android.content.Context
 import com.lagradost.cloudstream3.*
+import com.lagradost.cloudstream3.plugins.CloudstreamPlugin
+import com.lagradost.cloudstream3.plugins.Plugin
 import com.lagradost.cloudstream3.utils.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -10,6 +13,14 @@ import org.json.JSONObject
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
+
+@CloudstreamPlugin
+class RTPlugin : Plugin() {
+    override fun load(context: Context) {
+        registerMainAPI(RTProvider())
+    }
+}
+
 
 /**
  * RTProvider - Plugin de Cloudstream para Russia Today (RT)
@@ -191,6 +202,18 @@ class RTProvider : MainAPI() {
             }
         }
 
+        // 4. Buscar en Odysee VOD (Español e Inglés)
+        val odyseeResults = async(Dispatchers.IO) {
+            try {
+                val es = searchOdysee(query, "@ActualidadRT:9")
+                val en = if (es.size < 10) searchOdysee(query, "@RT:fd") else emptyList()
+                es + en
+            } catch (e: Exception) {
+                emptyList()
+            }
+        }
+
+        results.addAll(odyseeResults.await())
         results.addAll(rssResults.await())
         results.addAll(webResults.await())
 
@@ -457,6 +480,51 @@ class RTProvider : MainAPI() {
                     put("order_by", org.json.JSONArray().apply { put("release_time") })
                     put("page", 1)
                     put("page_size", 20)
+                })
+                put("id", 1)
+            }.toString()
+
+            val res = app.post(
+                "https://api.na-backend.odysee.com/api/v1/proxy",
+                headers = mapOf("Content-Type" to "application/json"),
+                data = postBody
+            ).text
+
+            val json = JSONObject(res)
+            val items = json.optJSONObject("result")?.optJSONArray("items") ?: return emptyList()
+            val list = mutableListOf<SearchResponse>()
+
+            for (i in 0 until items.length()) {
+                val item = items.getJSONObject(i)
+                val claimId = item.optString("claim_id")
+                val name = item.optString("name")
+                val value = item.optJSONObject("value") ?: JSONObject()
+                val title = value.optString("title", name)
+                val thumb = value.optJSONObject("thumbnail")?.optString("url") ?: defaultPoster
+                val streamUrl = "https://odysee.com/$/download/$name/$claimId"
+
+                list.add(newMovieSearchResponse(title, streamUrl, TvType.Movie) {
+                    this.posterUrl = fixUrlNull(thumb)
+                })
+            }
+            list
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+    private suspend fun searchOdysee(query: String, channel: String): List<SearchResponse> {
+        return try {
+            val postBody = JSONObject().apply {
+                put("jsonrpc", "2.0")
+                put("method", "claim_search")
+                put("params", JSONObject().apply {
+                    put("text", query)
+                    put("channel", channel)
+                    put("claim_type", "stream")
+                    put("order_by", org.json.JSONArray().apply { put("release_time") })
+                    put("page", 1)
+                    put("page_size", 25)
                 })
                 put("id", 1)
             }.toString()
