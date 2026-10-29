@@ -487,7 +487,7 @@ class RTProvider : MainAPI() {
             val res = app.post(
                 "https://api.na-backend.odysee.com/api/v1/proxy",
                 headers = mapOf("Content-Type" to "application/json"),
-                data = postBody
+                requestBody = okhttp3.RequestBody.create(okhttp3.MediaType.parse("application/json"), postBody)
             ).text
 
             val json = JSONObject(res)
@@ -532,7 +532,7 @@ class RTProvider : MainAPI() {
             val res = app.post(
                 "https://api.na-backend.odysee.com/api/v1/proxy",
                 headers = mapOf("Content-Type" to "application/json"),
-                data = postBody
+                requestBody = okhttp3.RequestBody.create(okhttp3.MediaType.parse("application/json"), postBody)
             ).text
 
             val json = JSONObject(res)
