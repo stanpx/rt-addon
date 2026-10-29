@@ -1,0 +1,16 @@
+[
+    {
+        "fileHash": "sha256-8649c16f52782a6c6161807d4004b38a5434cd466eef993b884fc070b0ba33dd",
+        "apiVersion": 1,
+        "repositoryUrl": "https://github.com/stanpx/rt-addon",
+        "fileSize": 27294,
+        "status": 3,
+        "authors": [
+            
+        ],
+        "version": 3,
+        "internalName": "rt-addon",
+        "url": "https://raw.githubusercontent.com/stanpx/rt-addon/builds/rt-addon.cs3",
+        "name": "rt-addon"
+    }
+]
