@@ -347,17 +347,11 @@ class RTProvider : MainAPI() {
                 "https://odysee.com/$/download/$claimName/$claimId"
             }
 
-            val finalUrl = try {
-                app.head(downloadUrl, followRedirects = false).headers["Location"] ?: downloadUrl
-            } catch (e: Exception) {
-                downloadUrl
-            }
-
             callback.invoke(
                 newExtractorLink(
                     source = this.name,
                     name = "Odysee MP4 Stream",
-                    url = finalUrl,
+                    url = downloadUrl,
                     type = ExtractorLinkType.VIDEO
                 )
             )
