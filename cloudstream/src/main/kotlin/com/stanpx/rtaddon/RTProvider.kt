@@ -13,6 +13,8 @@ import org.json.JSONObject
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody.Companion.toRequestBody
 
 @CloudstreamPlugin
 class RTPlugin : Plugin() {
@@ -487,7 +489,7 @@ class RTProvider : MainAPI() {
             val res = app.post(
                 "https://api.na-backend.odysee.com/api/v1/proxy",
                 headers = mapOf("Content-Type" to "application/json"),
-                requestBody = okhttp3.RequestBody.create(okhttp3.MediaType.parse("application/json"), postBody)
+                requestBody = postBody.toRequestBody("application/json".toMediaTypeOrNull())
             ).text
 
             val json = JSONObject(res)
@@ -532,7 +534,7 @@ class RTProvider : MainAPI() {
             val res = app.post(
                 "https://api.na-backend.odysee.com/api/v1/proxy",
                 headers = mapOf("Content-Type" to "application/json"),
-                requestBody = okhttp3.RequestBody.create(okhttp3.MediaType.parse("application/json"), postBody)
+                requestBody = postBody.toRequestBody("application/json".toMediaTypeOrNull())
             ).text
 
             val json = JSONObject(res)
