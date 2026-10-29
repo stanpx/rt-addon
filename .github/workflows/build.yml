@@ -25,13 +25,6 @@ jobs:
         with:
           path: "src"
 
-      - name: Checkout builds branch
-        uses: actions/checkout@v4
-        continue-on-error: true
-        with:
-          ref: "builds"
-          path: "builds"
-
       - name: Setup JDK 17
         uses: actions/setup-java@v4
         with:
@@ -50,22 +43,28 @@ jobs:
           cd $GITHUB_WORKSPACE/src/cloudstream
           chmod +x gradlew
           ./gradlew make makePluginsJson || ./gradlew make
-          mkdir -p $GITHUB_WORKSPACE/builds
-          cp -f build/*.cs3 $GITHUB_WORKSPACE/builds/ 2>/dev/null || cp -f **/build/*.cs3 $GITHUB_WORKSPACE/builds/ 2>/dev/null || true
-          if [ -f build/plugins.json ]; then
-            cp -f build/plugins.json $GITHUB_WORKSPACE/builds/
+
+      - name: Deploy to builds branch
+        run: |
+          mkdir -p $GITHUB_WORKSPACE/deploy
+          cd $GITHUB_WORKSPACE/deploy
+
+          # Copiar paquetes compilados
+          cp -f $GITHUB_WORKSPACE/src/cloudstream/build/*.cs3 RTProvider.cs3 2>/dev/null || true
+          cp -f $GITHUB_WORKSPACE/src/cloudstream/build/*.cs3 rt-addon.cs3 2>/dev/null || true
+          
+          # Copiar lista de plugins
+          if [ -f $GITHUB_WORKSPACE/src/cloudstream/build/plugins.json ]; then
+            cp -f $GITHUB_WORKSPACE/src/cloudstream/build/plugins.json plugins.json
           else
-            cp -f $GITHUB_WORKSPACE/src/plugins.json $GITHUB_WORKSPACE/builds/
+            cp -f $GITHUB_WORKSPACE/src/plugins.json plugins.json
           fi
 
-      - name: Push builds
-        run: |
-          cd $GITHUB_WORKSPACE/builds
           git init
           git config --local user.email "actions@github.com"
           git config --local user.name "GitHub Actions"
           git checkout -B builds
-          git add .
-          git commit -m "Build $GITHUB_SHA" || exit 0
-          git remote add origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git 2>/dev/null || true
+          git add -f *
+          git commit -m "Deploy CloudStream build $GITHUB_SHA" || exit 0
+          git remote add origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
           git push -u origin builds --force
