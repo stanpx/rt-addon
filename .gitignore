@@ -1,0 +1,18 @@
+# Dependencies
+node_modules/
+.npm/
+
+# Sensitive Author Private Key (Kino Ed25519)
+kino-author-key.pem
+
+# Build artifacts
+build/
+.gradle/
+*.class
+*.jar
+*.cs3
+
+# Logs & temp
+*.log
+.DS_Store
+.kino-cookies.json

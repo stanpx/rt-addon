@@ -1,0 +1,27 @@
+{
+  "name": "rt-addon-stremio",
+  "version": "1.0.0",
+  "description": "Stremio addon para RT (Russia Today) en varios idiomas: canales en vivo, VOD y noticias RSS.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": [
+    "stremio",
+    "stremio-addon",
+    "rt",
+    "russia-today",
+    "kino-plugin",
+    "nuvio",
+    "iptv",
+    "vod"
+  ],
+  "author": "stanpx",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.7.9",
+    "cheerio": "^1.0.0",
+    "rss-parser": "^3.13.0",
+    "stremio-addon-sdk": "^1.6.10"
+  }
+}

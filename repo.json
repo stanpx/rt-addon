@@ -1,0 +1,8 @@
+{
+  "name": "stanpx CloudStream Repository",
+  "description": "Repositorio oficial de stanpx con RT Addon para CloudStream",
+  "manifestVersion": 1,
+  "pluginLists": [
+    "https://raw.githubusercontent.com/stanpx/rt-addon/main/plugins.json"
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "name": "rt-addon",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Addon multilingüe de Russia Today (RT) para Kino TV, Nuvio, Stremio y Cloudstream",
+  "scripts": {
+    "sign": "node sdk/seal.mjs --sign --repo stanpx/rt-addon --key kino-author-key.pem",
+    "validate": "node sdk/validate.mjs . --repo stanpx/rt-addon",
+    "test": "node sdk/run.mjs . home",
+    "test:live": "node sdk/run.mjs . live categories",
+    "test:channels": "node sdk/run.mjs . live channels live"
+  },
+  "keywords": [
+    "kino-plugin",
+    "stremio",
+    "cloudstream",
+    "nuvio",
+    "rt",
+    "russia-today"
+  ],
+  "author": "stanpx",
+  "license": "MIT"
+}

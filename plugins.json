@@ -1,0 +1,22 @@
+[
+  {
+    "name": "RT Addon",
+    "internalName": "RTProvider",
+    "version": 1,
+    "apiVersion": 1,
+    "description": "Contenido de RT (Russia Today) en varios idiomas: canales de TV en vivo, noticias RSS y reportajes VOD.",
+    "authors": [
+      "stanpx"
+    ],
+    "language": "es",
+    "tvTypes": [
+      "Live",
+      "Movie",
+      "Documentary"
+    ],
+    "iconUrl": "https://www.ecured.cu/images/9/9d/RT-TV.png",
+    "url": "https://raw.githubusercontent.com/stanpx/rt-addon/builds/RTProvider.cs3",
+    "status": 1,
+    "repositoryUrl": "https://github.com/stanpx/rt-addon"
+  }
+]
