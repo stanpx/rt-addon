@@ -1006,13 +1006,26 @@ builder.defineStreamHandler(async ({ type, id }) => {
   // B) Videos de Odysee
   if (id.startsWith("rt:vod:odysee:")) {
     const claimId = id.slice("rt:vod:odysee:".length);
-    // URL de descarga directa que Odysee redirige a MP4
     const downloadUrl = `https://odysee.com/$/download/stream/${claimId}`;
+    let streamUrl = downloadUrl;
+    try {
+      const headRes = await httpClient.head(downloadUrl, {
+        maxRedirects: 0,
+        validateStatus: (status) => status >= 200 && status < 400
+      });
+      if (headRes.headers && headRes.headers.location) {
+        streamUrl = headRes.headers.location;
+      }
+    } catch (e) {
+      if (e.response && e.response.headers && e.response.headers.location) {
+        streamUrl = e.response.headers.location;
+      }
+    }
     return {
       streams: [
         {
           title: "Odysee / LBRY HD (MP4 Stream)",
-          url: downloadUrl
+          url: streamUrl
         }
       ]
     };

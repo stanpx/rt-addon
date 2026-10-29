@@ -2,7 +2,7 @@
   {
     "name": "RT Addon",
     "internalName": "RTProvider",
-    "version": 2,
+    "version": 3,
     "apiVersion": 1,
     "description": "Contenido de RT (Russia Today) en varios idiomas: canales de TV en vivo, noticias RSS y reportajes VOD.",
     "authors": [

@@ -514,8 +514,32 @@ export async function resolve(ref) {
 
   // 2. Videos de Odysee
   if (r.startsWith("odysee:")) {
-    const parts = r.split(":");
-    const downloadUrl = parts[2] || `https://odysee.com/$/download/stream/${parts[1]}`;
+    let downloadUrl = "";
+    if (r.includes("http://") || r.includes("https://")) {
+      downloadUrl = r.substring(r.indexOf("http"));
+    } else {
+      const parts = r.split(":");
+      const claimId = parts[1] || "";
+      downloadUrl = `https://odysee.com/$/download/stream/${claimId}`;
+    }
+
+    try {
+      const headRes = await kino.fetch(downloadUrl, {
+        method: "HEAD",
+        redirect: "manual",
+        headers: { "User-Agent": "Mozilla/5.0" }
+      });
+      const h = headRes.headers || {};
+      const location = (typeof h.get === "function" ? h.get("location") : (h["location"] || h["Location"]));
+      if (location && location.startsWith("http")) {
+        return {
+          url: location,
+          mime: "video/mp4",
+          headers: { "User-Agent": "Mozilla/5.0" }
+        };
+      }
+    } catch (_) {}
+
     return {
       url: downloadUrl,
       mime: "video/mp4",

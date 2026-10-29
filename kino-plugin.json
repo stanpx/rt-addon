@@ -1,7 +1,7 @@
 {
   "id": "rt-addon",
   "name": "RT Addon",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "apiVersion": 5,
   "entry": "plugin.js",
   "description": "Canales de TV en vivo, noticias RSS y coberturas VOD de RT (Russia Today) en Español, Inglés, Árabe, Alemán, Francés, Ruso, Serbio y Chino.",
@@ -77,6 +77,6 @@
   ],
   "signature": {
     "authorKey": "1620221bcf6bfae0382c71590238dbfb173d2ea1088b1ca83a7762f6dab17f49",
-    "value": "f946430741c8b8562d63e66ea71340bb72e7c21b356aded5ef72a7f1d1295d608e5ed021d146c0c4844532c0d332de39d868a9427ede79fe05f50331f0e6250b"
+    "value": "fa1278159e85a9666b68c6daf1f216c7fb5315a7799968984b7f445d84265da735fc1c1b9a05b692ec01e4109073a98abc5813904774103481ec023054126804"
   }
 }

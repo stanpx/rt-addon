@@ -30,7 +30,7 @@ cloudstream {
     setRepo(System.getenv("GITHUB_REPOSITORY") ?: "https://github.com/stanpx/rt-addon")
 }
 
-version = 2
+version = 3
 
 android {
     namespace = "com.stanpx.rtaddon"
